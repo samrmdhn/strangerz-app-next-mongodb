@@ -78,7 +78,7 @@ export async function getServerSideProps(ctx) {
   console.log(data);
 */
 
-  const res = await fetch("http://localhost:3000/api/post/" + id, {
+  const res = await fetch("https://strngrz.vercel.app/api/post/" + id, {
     method: "GET",
   });
 
