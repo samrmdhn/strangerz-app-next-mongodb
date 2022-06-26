@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import db from "../utils/db";
 
 export async function getServerSideProps(ctx) {
-  const res = await axios.get("http://localhost:3000/api/home");
+  const res = await axios.get("https://strngrz.vercel.app/api/home");
 
   const data = res.data.data;
   // data.data.isLiked = false;
@@ -389,7 +389,6 @@ export default function Home(props) {
                           </div>
 
                           <div className="img-container">
-                            {/*
                             <Image
                               onDoubleClick={() => {
                                 likeHandler(post._id, post.likes);
@@ -399,7 +398,6 @@ export default function Home(props) {
                               width="240"
                               alt="image"
                             />
-                            */}
                           </div>
                         </div>
                       </div>
