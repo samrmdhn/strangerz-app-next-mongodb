@@ -4,26 +4,61 @@ import dayjs from "dayjs";
 import localizedFormat from "dayjs/plugin/localizedFormat";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
-import "bootstrap/dist/css/bootstrap.css";
 import Router from "next/router";
-import TextScramble from "../components/textscramble";
+import Image from "next/image";
+import "bootstrap/dist/css/bootstrap.css";
+import db from "../utils/db";
 
 export async function getServerSideProps(ctx) {
-  const res = await fetch("http://localhost:3000/api/home", {
-    method: "GET",
-  });
+  const res = await axios.get("http://localhost:3000/api/home");
+
+  const data = res.data.data;
+  // data.data.isLiked = false;
 
   /*
+  const datas = JSON.stringify({
+    collection: "posts",
+    database: "test",
+    dataSource: "Cluster0",
+  });
+
+  const config = {
+    method: "post",
+    url: "https://data.mongodb-api.com/app/data-zmirn/endpoint/data/v1/action/find",
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Request-Headers": "*",
+      "api-key":
+        "ilbpBNqGl4ECqjrevHqWIcBLCpRuBT7CSIk4ubU651EG43VHyHSGIS2gkP4Jgxcz",
+    },
+    data: datas,
+  };
+
+  const data = await axios(config)
+    .then(function (response) {
+      return response.data.documents;
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+  console.log(data);
+*/
+  /*
+S
+  conso
 
   Menambahkan isLiked agar memudahkan logic tombol like untuk setiap post
   Jika tidak ditambahkan, pencet like akan ke semua post
 
   */
 
-  const data = await res.json();
-  data.data.map((dta) => {
-    return (dta.isLiked = false);
-  });
+  //const data = await res.json();
+  // console.log(res);
+
+  //data.data.map((dta) => {
+  //  return (dta.isLiked = false);
+  //});
 
   return {
     props: { data },
@@ -31,9 +66,7 @@ export async function getServerSideProps(ctx) {
 }
 
 export default function Home(props) {
-  const [posts, setPosts] = useState(props.data.data);
-
-  const [postsStorage, setPostsStorage] = useState([]);
+  const [posts, setPosts] = useState(props.data);
 
   const postsStoragez = posts.filter((post) => {
     return post.isValue == true;
@@ -69,10 +102,12 @@ export default function Home(props) {
       "https://i.ibb.co/1Z1hc3r/memoji10.png",
       "https://i.ibb.co/r0K1QGB/memoji7.png",
       "https://i.ibb.co/T1Tsv2Y/memoji8.png",
+      "https://i.ibb.co/xHzyVtT/memoji11.png",
+      "https://i.ibb.co/QYppPC4/memoji9.png",
     ];
 
     const min = 0;
-    const max = 8;
+    const max = 9;
     const result = Math.random() * (max - min) + min;
     const result2 = Math.floor(result); //3
     const randomUrlPics1 = randomPics[result2];
@@ -93,7 +128,7 @@ export default function Home(props) {
     };
 
     try {
-      const res = await fetch("http://localhost:3000/api/home", {
+      const res = await fetch("/api/home", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +137,19 @@ export default function Home(props) {
       });
       //content.data cukup sekali aja datanya
       const content = await res.json();
+      content.data
+        .sort((a, b) =>
+          dayjs(a.createdAt).format("llll") > dayjs(b.createdAt).format("lll")
+            ? -1
+            : 1
+        )
+        .slice(0, 4)
+        .map((cnt) => {
+          return cnt;
+        });
+      console.log(content.data);
       setPosts(content.data);
+      setPostSubmitted(true);
     } catch (error) {
       console.log(error);
     }
@@ -121,7 +168,7 @@ export default function Home(props) {
     posts[findPostIndex].isLiked = true;
     //const postLiked = posts[findPostIndex];
 
-    const postLiked = posts[findPostIndex];
+    //   const postLiked = posts[findPostIndex];
 
     /*
     const listLikedPost = JSON.parse(
@@ -141,19 +188,22 @@ export default function Home(props) {
     const likes = {
       likes: likesData,
     };
+    console.log(likes);
 
     try {
-      const res = await fetch(`http://localhost:3000/api/post/like/${tempId}`, {
+      const res = await fetch(`/api/post/like/${tempId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(likes),
       });
+      console.log(likes);
       const data = await res.json();
+      console.log(data);
       setLikeSubmit(true);
-    } catch (error) {
-      console.log(error);
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -163,12 +213,6 @@ export default function Home(props) {
   };
 
   if (likeSubmit) likeSubmitHandler();
-
-  const ScrambleTexts = [
-    "lorem ipsum",
-    "dolor sit amet",
-    "consectetur adipiscing elit",
-  ];
 
   return (
     <div>
@@ -186,36 +230,44 @@ export default function Home(props) {
             >
               💥 SHOW POPULAR POSTS 💥
             </button>
-            <form type="submit" onSubmit={postHandler}>
-              <textarea
-                style={{ resize: "none", height: 50 }}
-                className="form-control"
-                type="text"
-                defaultValue={description}
-                placeholder="Add a post..."
-                onChange={(e) => {
-                  setDescription(e.target.value);
-                }}
-              />
-              <button
-                className="btn btn-primary btn-buat"
-                style={{
-                  backgroundColor: "#1258ae",
-                  color: "#d7d7d7",
-                  borderColor: "#1258ae",
-                  fontWeight: "bolder",
-                }}
-                type="submit"
-              >
-                SEND
-              </button>
-            </form>
 
-            {/* */}
+            {postSubmitted ? (
+              <>
+                <div className="title2">SUBMIT SUCCESS</div>
+              </>
+            ) : (
+              <>
+                <form type="submit" onSubmit={postHandler}>
+                  <textarea
+                    style={{ resize: "none", height: 50 }}
+                    className="form-control"
+                    type="text"
+                    defaultValue={description}
+                    placeholder="Add a post..."
+                    onChange={(e) => {
+                      setDescription(e.target.value);
+                    }}
+                  />
+                  <button
+                    className="btn btn-primary btn-buat"
+                    style={{
+                      backgroundColor: "#1258ae",
+                      color: "#d7d7d7",
+                      borderColor: "#1258ae",
+                      fontWeight: "bolder",
+                    }}
+                    type="submit"
+                  >
+                    SEND
+                  </button>
+                </form>
+              </>
+            )}
+
             {posts &&
               posts
                 .sort((a, b) =>
-                  dayjs(a.createdAt).format("lll") >
+                  dayjs(a.createdAt).format("llll") >
                   dayjs(b.createdAt).format("lll")
                     ? -1
                     : 1
@@ -226,26 +278,33 @@ export default function Home(props) {
                     <div key={post._id}>
                       <div className="cardz">
                         <div className="cardz-header">
-                          <div className="title">"{post.name}"</div>
+                          <div className="title">&quot;{post.name}&quot;</div>
                         </div>
                         <div className="cardz-body position-relative">
-                          <img
-                            className="recurso1 position-absolute top-0 start-0"
-                            style={{ width: 57 }}
-                            src="https://i.ibb.co/q5wH8W6/Untitled-1.png"
-                            alt=""
-                          />
-                          <img
-                            className="recurso2 position-absolute top-0 end-0"
-                            src="https://i.ibb.co/m44QMtm/Recurso-28-MODERN-ICONS.png"
-                            alt=""
-                          />
-                          <img
-                            className="recurso3 position-absolute bottom-0 end-0"
-                            style={{ width: 83 }}
-                            src="https://i.ibb.co/BCzvpJP/asa.png"
-                            alt=""
-                          />
+                          <div className="recurso1 position-absolute top-0 start-0">
+                            <Image
+                              width="57"
+                              height="57"
+                              src="https://i.ibb.co/q5wH8W6/Untitled-1.png"
+                              alt="qr-code"
+                            />
+                          </div>
+                          <div className="recurso2 position-absolute top-0 end-0">
+                            <Image
+                              src="https:///i.ibb.co/m44QMtm/Recurso-28-MODERN-ICONS.png"
+                              alt="block-square"
+                              width="150"
+                              height="76"
+                            />
+                          </div>
+                          <div className="recurso3 position-absolute bottom-0 end-0">
+                            <Image
+                              width="80"
+                              height="75"
+                              src="https:///i.ibb.co/BCzvpJP/asa.png"
+                              alt="checkboard"
+                            />
+                          </div>
                           <div className="position-absolute top-0 start-0 mt-3 atas-kiri">
                             VIA &#160;
                             <span style={{ fontStyle: "italic" }}>
@@ -264,7 +323,7 @@ export default function Home(props) {
                               style={{ fontWeight: "bolder", color: "black" }}
                             >
                               <p style={{ color: "black" }}>
-                                "{post.description}"
+                                &quot;{post.description}&quot;
                               </p>
                               <div
                                 className="position-absolute top-100 start-0 translate-middle love-emoticon"
@@ -330,16 +389,19 @@ export default function Home(props) {
                           </div>
 
                           <div className="img-container">
-                            <img
+                            {/*
+                            <Image
                               onDoubleClick={() => {
                                 likeHandler(post._id, post.likes);
                               }}
                               src={post.urlPics}
-                              height="300"
+                              height="290"
+                              width="240"
+                              alt="image"
                             />
+                            */}
                           </div>
                         </div>
-                        <div className=" cardz-footer"></div>
                       </div>
                     </div>
                   );
