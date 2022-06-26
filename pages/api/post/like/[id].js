@@ -1,5 +1,6 @@
 import Post from "../../../../models/Post";
 import db from "../../../../utils/db";
+
 export default async function handler(req, res) {
   if (req.method !== "PUT") return res.status(405).end();
 
@@ -7,6 +8,7 @@ export default async function handler(req, res) {
     await db();
     const { id } = req.query;
     const likesBody = req.body;
+    console.log(id, likesBody);
     const post = await Post.findOne({ _id: id });
 
     post.likes = likesBody.likes;
@@ -17,7 +19,9 @@ export default async function handler(req, res) {
       message: "Likes submitted",
       data: post,
     });
+
+    //Tadinya ada error API not respond cmn karena gada res.status(405).end() di catch errornya
   } catch (error) {
-    console.log(error);
+    return res.status(405).end();
   }
 }

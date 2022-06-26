@@ -6,8 +6,7 @@ import timezone from "dayjs/plugin/timezone";
 import { useRouter } from "next/router";
 import "bootstrap/dist/css/bootstrap.css";
 import Link from "next/link";
-
-import { useIsomorphicLayoutEffect, useEffectOnce } from "react-use";
+import Image from "next/image";
 /*
 
 NOTES: 
@@ -38,6 +37,46 @@ NOTES:
 
 export async function getServerSideProps(ctx) {
   const { id } = ctx.query;
+  /*
+  const idFix = {
+    id,
+  };
+  const datas = JSON.stringify({
+    dataSource: "Cluster0",
+    database: "test",
+    collection: "posts",
+    
+    projection: {
+      _id: id,
+    },
+    
+    filter: {
+      name: idFix.id,
+    },
+  });
+
+  const config = {
+    method: "post",
+    url: `https://data.mongodb-api.com/app/data-zmirn/endpoint/data/v1/action/findOne`,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Request-Headers": "*",
+      "api-key":
+        "ilbpBNqGl4ECqjrevHqWIcBLCpRuBT7CSIk4ubU651EG43VHyHSGIS2gkP4Jgxcz",
+    },
+    data: datas,
+  };
+
+  const data = await axios(config)
+    .then(function (response) {
+      return response.data;
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+  console.log(data);
+*/
 
   const res = await fetch("http://localhost:3000/api/post/" + id, {
     method: "GET",
@@ -46,14 +85,6 @@ export async function getServerSideProps(ctx) {
   const data = await res.json();
   data.data.isLiked = false;
 
-  const Demo = ({ value }) => {
-    useIsomorphicLayoutEffect(() => {
-      window.console.log(value);
-    }, [value]);
-
-    return null;
-  };
-
   return {
     props: { id, data },
   };
@@ -61,6 +92,7 @@ export async function getServerSideProps(ctx) {
 
 export default function PostLists(props) {
   const [post, setPost] = useState(props.data.data);
+
   dayjs.extend(localizedFormat);
   dayjs.extend(utc);
   dayjs.extend(timezone);
@@ -141,6 +173,7 @@ export default function PostLists(props) {
   //Data server side rendering bisa dimanipulasi dengan dimasukkan kepada state
   const [commentBodyTemp, setCommentBodyTemp] = useState("");
   const [postComment, setPostComment] = useState(props.data.data.commentId);
+  console.log(props.data.commentId);
   const [tempId, setTempId] = useState();
   const [tempLike, setTempLike] = useState();
   const [likeSubmit, setLikeSubmit] = useState(false);
@@ -151,7 +184,7 @@ export default function PostLists(props) {
     const comment = { commentBody: cmt };
 
     try {
-      const res = await fetch(`http://localhost:3000/api/post/${id}`, {
+      const res = await fetch(`/api/post/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,6 +198,7 @@ export default function PostLists(props) {
       kembali pada state post untuk rerender
       */
       // post.comment = content.data.comment;
+
       setPostComment(content.data.commentId);
     } catch (error) {
       console.log(error);
@@ -188,7 +222,7 @@ export default function PostLists(props) {
     };
 
     try {
-      const res = await fetch(`http://localhost:3000/api/post/like/${id}`, {
+      const res = await fetch(`/api/post/like/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -219,26 +253,33 @@ export default function PostLists(props) {
                 </div>
               </Link>
               <div className="cardz-header">
-                <div className="title">"{post.name}"</div>
+                <div className="title"> &quot;{post.name}&quot;</div>
               </div>
               <div className="cardz-body position-relative">
-                <img
-                  className="recurso1 position-absolute top-0 start-0"
-                  style={{ width: 57 }}
-                  src="https://i.ibb.co/q5wH8W6/Untitled-1.png"
-                  alt=""
-                />
-                <img
-                  className="recurso2 position-absolute top-0 end-0"
-                  src="https://i.ibb.co/m44QMtm/Recurso-28-MODERN-ICONS.png"
-                  alt=""
-                />
-                <img
-                  className="recurso3 position-absolute bottom-0 end-0"
-                  style={{ width: 83 }}
-                  src="https://i.ibb.co/BCzvpJP/asa.png"
-                  alt=""
-                />
+                <div className="recurso1 position-absolute top-0 start-0">
+                  <Image
+                    width="57"
+                    height="57"
+                    src="https://i.ibb.co/q5wH8W6/Untitled-1.png"
+                    alt="qr-code"
+                  />
+                </div>
+                <div className="recurso2 position-absolute top-0 end-0">
+                  <Image
+                    src="https:///i.ibb.co/m44QMtm/Recurso-28-MODERN-ICONS.png"
+                    alt="block-square"
+                    width="150"
+                    height="76"
+                  />
+                </div>
+                <div className="recurso3 position-absolute bottom-0 end-0">
+                  <Image
+                    width="80"
+                    height="75"
+                    src="https:///i.ibb.co/BCzvpJP/asa.png"
+                    alt="checkboard"
+                  />
+                </div>
                 <div className="position-absolute top-0 start-0 mt-3 atas-kiri">
                   VIA <span style={{ fontStyle: "italic" }}>STRANGERZ</span>{" "}
                   <br />
@@ -253,7 +294,10 @@ export default function PostLists(props) {
                     className="comment position-relative"
                     style={{ fontWeight: "bolder", color: "black" }}
                   >
-                    <p style={{ color: "black" }}>"{post.description}"</p>
+                    <p style={{ color: "black" }}>
+                      {" "}
+                      &quot;{post.description} &quot;
+                    </p>
                     <div
                       className="position-absolute top-100 start-0 translate-middle love-emoticon"
                       onClick={() => {
@@ -312,12 +356,14 @@ export default function PostLists(props) {
                 </div>
 
                 <div className="img-container">
-                  <img
+                  <Image
                     onDoubleClick={() => {
                       likeHandler(post._id, post.likes);
                     }}
                     src={post.urlPics}
-                    height="300"
+                    height="290"
+                    width="240"
+                    alt="image"
                   />
                 </div>
               </div>
