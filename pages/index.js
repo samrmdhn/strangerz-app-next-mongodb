@@ -10,7 +10,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import db from "../utils/db";
 
 export async function getServerSideProps(ctx) {
-  const res = await axios.get("https://strngrz.vercel.app/api/home");
+  const res = await axios.get("https://strngrz666.vercel.app/api/home");
 
   const data = res.data.data;
   // data.data.isLiked = false;
